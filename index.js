@@ -46,7 +46,7 @@ const handleUserChoice = (answers) => {
             break;
         case 'Log Out':
             db.end();
-            console.log("Thanks!");
+            console.log("Logged out. Have a nice day!");
             break;
     }
 };
@@ -73,6 +73,42 @@ const addDepartment = () => {
             if (err) throw err;
             console.log(`Added ${answers.department} to the database.`);
             employee_tracker();
+        });
+    });
+};
+
+const addRole = () => {
+    db.query(`SELECT * FROM department`, (err, result) => {
+        if (err) throw err;
+
+        inquirer.prompt([
+            {
+                type: 'input',
+                name: 'role',
+                message: 'What is the name of the role?',
+                validate: roleInput => roleInput ? true : 'Please Add A Role!'
+            },
+            {
+                type: 'input',
+                name: 'salary',
+                message: 'What is the salary of the role?',
+                validate: salaryInput => salaryInput ? true : 'Please Add A Salary!'
+            },
+            {
+                type: 'list',
+                name: 'department',
+                message: 'Which department does the role belong to?',
+                choices: result.map(row => row.name)
+            }
+        ]).then(answers => {
+            const department = result.find(row => row.name === answers.department);
+
+            db.query(`INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)`,
+                [answers.role, answers.salary, department.id], (err, result) => {
+                    if (err) throw err;
+                    console.log(`Added ${answers.role} to the database.`);
+                    employee_tracker();
+                });
         });
     });
 };

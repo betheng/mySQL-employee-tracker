@@ -142,7 +142,7 @@ const addEmployee = () => {
             {
                 type: 'input',
                 name: 'manager',
-                message: 'Who is the employee\'s manager?',
+                message: 'Who is the employee\'s manager by last name?',
                 validate: managerInput => managerInput ? true : 'Please Add A Manager!'
             }
         ]).then(answers => {
@@ -161,6 +161,49 @@ const addEmployee = () => {
                     console.log(`Added ${answers.firstName} ${answers.lastName} to the database.`);
                     employee_tracker();
                 });
+        });
+    });
+};
+
+// UPDATE EMPLOYEE function
+
+const updateEmployeeRole = () => {
+    db.query(`SELECT * FROM employee`, (err, employees) => {
+        if (err) throw err;
+
+        db.query(`SELECT * FROM role`, (err, roles) => {
+            if (err) throw err;
+
+            inquirer.prompt([
+                {
+                    type: 'list',
+                    name: 'employeeId',
+                    message: 'Which employee would you like to update?',
+                    choices: employees.map(employee => ({
+                        name: `${employee.first_name} ${employee.last_name}`,
+                        value: employee.id
+                    }))
+                },
+                {
+                    type: 'list',
+                    name: 'newRoleId',
+                    message: 'Select the new role for the employee:',
+                    choices: roles.map(role => ({
+                        name: role.title,
+                        value: role.id
+                    }))
+                }
+            ]).then(answers => {
+                db.query(
+                    'UPDATE employee SET role_id = ? WHERE id = ?',
+                    [answers.newRoleId, answers.employeeId],
+                    (err, result) => {
+                        if (err) throw err;
+                        console.log('Employee role updated successfully.');
+                        employee_tracker();
+                    }
+                );
+            });
         });
     });
 };

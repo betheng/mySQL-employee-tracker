@@ -115,7 +115,7 @@ const addRole = () => {
     });
 };
 
-// ADD EMPLOYEE function
+// ADD EMPLOYEE
 const addEmployee = () => {
     db.query(`SELECT * FROM employee, role`, (err, result) => {
         if (err) throw err;
@@ -138,13 +138,19 @@ const addEmployee = () => {
                 name: 'role',
                 message: 'What is the employee\'s role?',
                 choices: [...new Set(result.map(row => row.title))]
+            },
+            {
+                type: 'input',
+                name: 'manager',
+                message: 'Who is the employee\'s manager?',
+                validate: managerInput => managerInput ? true : 'Please Add A Manager!'
             }
         ]).then(answers => {
             const role = result.find(row => row.title === answers.role);
             const manager = result.find(row => row.last_name === answers.manager);
 
-            db.query(`INSERT INTO employee (first_name, last_name, role_id) VALUES (?, ?, ?, ?)`,
-                [answers.firstName, answers.lastName, role.id], (err, result) => {
+            db.query(`INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)`,
+                [answers.firstName, answers.lastName, role.id, manager.id], (err, result) => {
                     if (err) throw err;
                     console.log(`Added ${answers.firstName} ${answers.lastName} to the database.`);
                     employee_tracker();

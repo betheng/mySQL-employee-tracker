@@ -149,6 +149,12 @@ const addEmployee = () => {
             const role = result.find(row => row.title === answers.role);
             const manager = result.find(row => row.last_name === answers.manager);
 
+            if (!manager) {
+                console.log('The manager you entered cannot be found. Please check the manager\'s last name.');
+                employee_tracker();
+                return;
+            }
+
             db.query(`INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)`,
                 [answers.firstName, answers.lastName, role.id, manager.id], (err, result) => {
                     if (err) throw err;

@@ -60,6 +60,7 @@ const viewAll = (table) => {
     });
 };
 
+// ADD DEPARTMENT function
 const addDepartment = () => {
     inquirer.prompt([
         {
@@ -77,6 +78,7 @@ const addDepartment = () => {
     });
 };
 
+// ADD ROLE function
 const addRole = () => {
     db.query(`SELECT * FROM department`, (err, result) => {
         if (err) throw err;
@@ -107,6 +109,50 @@ const addRole = () => {
                 [answers.role, answers.salary, department.id], (err, result) => {
                     if (err) throw err;
                     console.log(`Added ${answers.role} to the database.`);
+                    employee_tracker();
+                });
+        });
+    });
+};
+
+// ADD EMPLOYEE function
+const addEmployee = () => {
+    db.query(`SELECT * FROM employee, role`, (err, result) => {
+        if (err) throw err;
+
+        inquirer.prompt([
+            {
+                type: 'input',
+                name: 'firstName',
+                message: 'What is the employee\'s first name?',
+                validate: firstNameInput => firstNameInput ? true : 'Please Add A First Name!'
+            },
+            {
+                type: 'input',
+                name: 'lastName',
+                message: 'What is the employee\'s last name?',
+                validate: lastNameInput => lastNameInput ? true : 'Please Add A Last Name!'
+            },
+            {
+                type: 'list',
+                name: 'role',
+                message: 'What is the employee\'s role?',
+                choices: [...new Set(result.map(row => row.title))]
+            },
+            {
+                type: 'input',
+                name: 'manager',
+                message: 'Who is the employee\'s manager?',
+                validate: managerInput => managerInput ? true : 'Please Add A Manager!'
+            }
+        ]).then(answers => {
+            const role = result.find(row => row.title === answers.role);
+            const manager = result.find(row => row.last_name === answers.manager);
+
+            db.query(`INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)`,
+                [answers.firstName, answers.lastName, role.id, manager.id], (err, result) => {
+                    if (err) throw err;
+                    console.log(`Added ${answers.firstName} ${answers.lastName} to the database.`);
                     employee_tracker();
                 });
         });
